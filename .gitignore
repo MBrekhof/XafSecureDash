@@ -27,3 +27,4 @@ Desktop.ini
 appsettings.*.json
 !appsettings.json
 !appsettings.Development.json
+__pycache__/
