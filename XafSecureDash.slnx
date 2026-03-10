@@ -1,0 +1,11 @@
+<Solution>
+  <Configurations>
+    <BuildType Name="Debug" />
+    <BuildType Name="EasyTest" />
+    <BuildType Name="Release" />
+  </Configurations>
+  <Project Path="XafSecureDash/XafSecureDash.Blazor.Server/XafSecureDash.Blazor.Server.csproj" />
+  <Project Path="XafSecureDash/XafSecureDash.Module/XafSecureDash.Module.csproj" />
+  <Project Path="XafSecureDash/XafSecureDash.WebApi/XafSecureDash.WebApi.csproj" />
+  <Project Path="XafSecureDash/XafSecureDash.Win/XafSecureDash.Win.csproj" />
+</Solution>
