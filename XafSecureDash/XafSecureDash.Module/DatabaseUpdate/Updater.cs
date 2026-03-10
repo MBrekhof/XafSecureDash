@@ -9,6 +9,7 @@ using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.BaseImpl.EF.PermissionPolicy;
 using Microsoft.Extensions.DependencyInjection;
 using XafSecureDash.Module.BusinessObjects;
+using XafSecureDash.Module.BusinessObjects.Dashboard;
 
 namespace XafSecureDash.Module.DatabaseUpdate
 {
@@ -36,36 +37,42 @@ namespace XafSecureDash.Module.DatabaseUpdate
             // If a role doesn't exist in the database, create this role
             var defaultRole = CreateDefaultRole();
             var adminRole = CreateAdminRole();
+            var managerRole = CreateManagerRole();
 
-            ObjectSpace.CommitChanges(); //This line persists created object(s).
+            ObjectSpace.CommitChanges();
 
             UserManager userManager = ObjectSpace.ServiceProvider.GetRequiredService<UserManager>();
 
-            // If a user named 'User' doesn't exist in the database, create this user
             if (userManager.FindUserByName<ApplicationUser>(ObjectSpace, "User") == null)
             {
-                // Set a password if the standard authentication type is used
                 string EmptyPassword = "";
                 _ = userManager.CreateUser<ApplicationUser>(ObjectSpace, "User", EmptyPassword, (user) =>
                 {
-                    // Add the Users role to the user
                     user.Roles.Add(defaultRole);
                 });
             }
 
-            // If a user named 'Admin' doesn't exist in the database, create this user
             if (userManager.FindUserByName<ApplicationUser>(ObjectSpace, "Admin") == null)
             {
-                // Set a password if the standard authentication type is used
                 string EmptyPassword = "";
                 _ = userManager.CreateUser<ApplicationUser>(ObjectSpace, "Admin", EmptyPassword, (user) =>
                 {
-                    // Add the Administrators role to the user
                     user.Roles.Add(adminRole);
                 });
             }
 
-            ObjectSpace.CommitChanges(); //This line persists created object(s).
+            if (userManager.FindUserByName<ApplicationUser>(ObjectSpace, "Manager") == null)
+            {
+                string EmptyPassword = "";
+                _ = userManager.CreateUser<ApplicationUser>(ObjectSpace, "Manager", EmptyPassword, (user) =>
+                {
+                    user.Roles.Add(managerRole);
+                });
+            }
+
+            ObjectSpace.CommitChanges();
+
+            SeedDashboards(defaultRole, managerRole);
 #endif
         }
         public override void UpdateDatabaseBeforeUpdateSchema()
@@ -83,6 +90,78 @@ namespace XafSecureDash.Module.DatabaseUpdate
             }
             return adminRole;
         }
+        PermissionPolicyRole CreateManagerRole()
+        {
+            PermissionPolicyRole managerRole = ObjectSpace.FirstOrDefault<PermissionPolicyRole>(r => r.Name == "Manager");
+            if (managerRole == null)
+            {
+                managerRole = ObjectSpace.CreateObject<PermissionPolicyRole>();
+                managerRole.Name = "Manager";
+
+                // Same base permissions as Default
+                managerRole.AddObjectPermissionFromLambda<ApplicationUser>(SecurityOperations.Read, cm => cm.ID == (Guid)CurrentUserIdOperator.CurrentUserId(), SecurityPermissionState.Allow);
+                managerRole.AddNavigationPermission(@"Application/NavigationItems/Items/Default/Items/MyDetails", SecurityPermissionState.Allow);
+                managerRole.AddMemberPermissionFromLambda<ApplicationUser>(SecurityOperations.Write, "ChangePasswordOnFirstLogon", cm => cm.ID == (Guid)CurrentUserIdOperator.CurrentUserId(), SecurityPermissionState.Allow);
+                managerRole.AddMemberPermissionFromLambda<ApplicationUser>(SecurityOperations.Write, "StoredPassword", cm => cm.ID == (Guid)CurrentUserIdOperator.CurrentUserId(), SecurityPermissionState.Allow);
+                managerRole.AddTypePermissionsRecursively<PermissionPolicyRole>(SecurityOperations.Read, SecurityPermissionState.Deny);
+                managerRole.AddObjectPermission<ModelDifference>(SecurityOperations.ReadWriteAccess, "UserId = ToStr(CurrentUserId())", SecurityPermissionState.Allow);
+                managerRole.AddObjectPermission<ModelDifferenceAspect>(SecurityOperations.ReadWriteAccess, "Owner.UserId = ToStr(CurrentUserId())", SecurityPermissionState.Allow);
+                managerRole.AddTypePermissionsRecursively<ModelDifference>(SecurityOperations.Create, SecurityPermissionState.Allow);
+                managerRole.AddTypePermissionsRecursively<ModelDifferenceAspect>(SecurityOperations.Create, SecurityPermissionState.Allow);
+
+                // Dashboard read access
+                managerRole.AddTypePermissionsRecursively<SecureDashboardData>(SecurityOperations.Read, SecurityPermissionState.Allow);
+                managerRole.AddNavigationPermission(@"Application/NavigationItems/Items/Reports/Items/SecureDashboardData_ListView", SecurityPermissionState.Allow);
+                managerRole.AddTypePermissionsRecursively<DashboardRoleAssignment>(SecurityOperations.Read, SecurityPermissionState.Allow);
+            }
+            return managerRole;
+        }
+
+        void SeedDashboards(PermissionPolicyRole defaultRole, PermissionPolicyRole managerRole)
+        {
+            // Dashboard 1: visible to everyone (no role assignments)
+            var publicDash = ObjectSpace.FirstOrDefault<SecureDashboardData>(d => d.Title == "Public Overview");
+            if (publicDash == null)
+            {
+                publicDash = ObjectSpace.CreateObject<SecureDashboardData>();
+                publicDash.Title = "Public Overview";
+            }
+
+            // Dashboard 2: restricted to Default role only
+            var userDash = ObjectSpace.FirstOrDefault<SecureDashboardData>(d => d.Title == "User Dashboard");
+            if (userDash == null)
+            {
+                userDash = ObjectSpace.CreateObject<SecureDashboardData>();
+                userDash.Title = "User Dashboard";
+            }
+
+            // Dashboard 3: restricted to Manager role only
+            var managerDash = ObjectSpace.FirstOrDefault<SecureDashboardData>(d => d.Title == "Manager Dashboard");
+            if (managerDash == null)
+            {
+                managerDash = ObjectSpace.CreateObject<SecureDashboardData>();
+                managerDash.Title = "Manager Dashboard";
+            }
+
+            ObjectSpace.CommitChanges();
+
+            // Role assignments (only for restricted dashboards)
+            if (!ObjectSpace.GetObjects<DashboardRoleAssignment>().Any())
+            {
+                var assignment1 = ObjectSpace.CreateObject<DashboardRoleAssignment>();
+                assignment1.Dashboard = userDash;
+                assignment1.Role = defaultRole;
+                assignment1.Notes = "Seed: User Dashboard visible to Default role";
+
+                var assignment2 = ObjectSpace.CreateObject<DashboardRoleAssignment>();
+                assignment2.Dashboard = managerDash;
+                assignment2.Role = managerRole;
+                assignment2.Notes = "Seed: Manager Dashboard visible to Manager role";
+
+                ObjectSpace.CommitChanges();
+            }
+        }
+
         PermissionPolicyRole CreateDefaultRole()
         {
             PermissionPolicyRole defaultRole = ObjectSpace.FirstOrDefault<PermissionPolicyRole>(role => role.Name == "Default");
@@ -100,6 +179,11 @@ namespace XafSecureDash.Module.DatabaseUpdate
                 defaultRole.AddObjectPermission<ModelDifferenceAspect>(SecurityOperations.ReadWriteAccess, "Owner.UserId = ToStr(CurrentUserId())", SecurityPermissionState.Allow);
                 defaultRole.AddTypePermissionsRecursively<ModelDifference>(SecurityOperations.Create, SecurityPermissionState.Allow);
                 defaultRole.AddTypePermissionsRecursively<ModelDifferenceAspect>(SecurityOperations.Create, SecurityPermissionState.Allow);
+
+                // Dashboard read access
+                defaultRole.AddTypePermissionsRecursively<SecureDashboardData>(SecurityOperations.Read, SecurityPermissionState.Allow);
+                defaultRole.AddNavigationPermission(@"Application/NavigationItems/Items/Reports/Items/SecureDashboardData_ListView", SecurityPermissionState.Allow);
+                defaultRole.AddTypePermissionsRecursively<DashboardRoleAssignment>(SecurityOperations.Read, SecurityPermissionState.Allow);
             }
             return defaultRole;
         }

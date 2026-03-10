@@ -19,11 +19,13 @@
 - [ ] Test with Default-role user (should see only permitted dashboards)
 
 ## Phase 3: Seed Data
-- [ ] Add sample dashboards in `Updater.cs`
-- [ ] Add sample role assignments in `Updater.cs`
-- [ ] Create a second non-admin role ("Manager") to demonstrate differential access
+- [x] Add sample dashboards in `Updater.cs` (Public Overview, User Dashboard, Manager Dashboard)
+- [x] Add sample role assignments in `Updater.cs`
+- [x] Create a second non-admin role ("Manager") to demonstrate differential access
+- [x] Add dashboard read permissions to Default and Manager roles
 
 ## Phase 4: Polish
-- [ ] Verify navigation item placement (Reports group)
-- [ ] Verify DashboardRoleAssignment is manageable via XAF UI (admin only)
-- [ ] Add role permissions for DashboardRoleAssignment (read for Default, full for Admin)
+- [x] Verify navigation item placement (Reports group)
+- [x] DashboardRoleAssignment in Administration nav group (admin manages)
+- [x] Add role permissions for SecureDashboardData and DashboardRoleAssignment (read for Default/Manager)
+- [ ] Manual testing with all 3 users (Admin, User, Manager)
