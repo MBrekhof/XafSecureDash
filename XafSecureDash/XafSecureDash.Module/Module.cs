@@ -41,6 +41,8 @@ namespace XafSecureDash.Module
             AdditionalExportedTypes.Add(typeof(DevExpress.Persistent.BaseImpl.EF.FileData));
             AdditionalExportedTypes.Add(typeof(DevExpress.Persistent.BaseImpl.EF.FileAttachment));
             AdditionalExportedTypes.Add(typeof(DevExpress.Persistent.BaseImpl.EF.HCategory));
+            AdditionalExportedTypes.Add(typeof(XafSecureDash.Module.BusinessObjects.Dashboard.SecureDashboardData));
+            AdditionalExportedTypes.Add(typeof(XafSecureDash.Module.BusinessObjects.Dashboard.DashboardRoleAssignment));
         }
         public override IEnumerable<ModuleUpdater> GetModuleUpdaters(IObjectSpace objectSpace, Version versionFromDB)
         {

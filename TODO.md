@@ -6,15 +6,15 @@
 - [~] In progress
 
 ## Phase 1: Core Entities
-- [ ] Create `SecureDashboardData` entity (extends `DashboardData`, maps to `DashboardData` table)
-- [ ] Create `DashboardRoleAssignment` entity (links dashboards to roles via FK)
-- [ ] Register both entities in `XafSecureDashEFCoreDbContext`
-- [ ] Register `SecureDashboardData` as `DashboardDataType` in Blazor `Startup.cs`
-- [ ] Enable `AllowExecutingCustomSql` on dashboard configurator in Blazor `Startup.cs`
+- [x] Create `SecureDashboardData` entity (extends `DashboardData`, maps to `DashboardData` table)
+- [x] Create `DashboardRoleAssignment` entity (links dashboards to roles via FK)
+- [x] Register both entities in `XafSecureDashEFCoreDbContext`
+- [x] Register `SecureDashboardData` as `DashboardDataType` in Blazor `Startup.cs`
+- [x] Enable `AllowExecutingCustomSql` on dashboard configurator in Blazor `Startup.cs`
 
 ## Phase 2: Security Controller
-- [ ] Create `DashboardSecurityController` (ObjectViewController on ListView of SecureDashboardData)
-- [ ] Implement filter logic: admins see all, users see unrestricted + role-matched dashboards
+- [x] Create `DashboardSecurityController` (ObjectViewController on ListView of SecureDashboardData)
+- [x] Implement filter logic: admins see all, users see unrestricted + role-matched dashboards
 - [ ] Test with Admin user (should see everything)
 - [ ] Test with Default-role user (should see only permitted dashboards)
 

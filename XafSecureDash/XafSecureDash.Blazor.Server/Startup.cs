@@ -37,7 +37,11 @@ namespace XafSecureDash.Blazor.Server
                     .AddConditionalAppearance()
                     .AddDashboards(options =>
                     {
-                        options.DashboardDataType = typeof(DevExpress.Persistent.BaseImpl.EF.DashboardData);
+                        options.DashboardDataType = typeof(XafSecureDash.Module.BusinessObjects.Dashboard.SecureDashboardData);
+                        options.SetupDashboardConfigurator = (configurator, serviceProvider) =>
+                        {
+                            configurator.AllowExecutingCustomSql = true;
+                        };
                     })
                     .AddFileAttachments()
                     .AddNotifications()

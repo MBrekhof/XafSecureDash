@@ -5,6 +5,7 @@ using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.BaseImpl.EF.PermissionPolicy;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
+using XafSecureDash.Module.BusinessObjects.Dashboard;
 
 namespace XafSecureDash.Module.BusinessObjects
 {
@@ -22,7 +23,8 @@ namespace XafSecureDash.Module.BusinessObjects
         public DbSet<XafSecureDash.Module.BusinessObjects.ApplicationUserLoginInfo> UserLoginsInfo { get; set; }
         public DbSet<FileData> FileData { get; set; }
         public DbSet<ReportDataV2> ReportDataV2 { get; set; }
-        public DbSet<DashboardData> DashboardData { get; set; }
+        public DbSet<SecureDashboardData> DashboardData { get; set; }
+        public DbSet<DashboardRoleAssignment> DashboardRoleAssignments { get; set; }
         public DbSet<HCategory> HCategories { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
