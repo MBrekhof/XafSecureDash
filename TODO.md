@@ -28,7 +28,7 @@
 - [x] Create working dashboard with Custom SQL query against CRM data
 
 ## Phase 3b: Connection String Hardening
-- [ ] Handle `ConfigureDataConnection` event to supply credentials for any connection name, so we don't need to keep adding config entries for each wizard-generated name (e.g. `localhost_Connection`)
+- [x] Using same approach as wlncentral: `DashboardConnectionStringsProvider(Configuration)` reads from `ConnectionStrings` in appsettings.json. Add wizard-generated connection names manually as needed. No dynamic event handler required.
 
 ## Phase 4: Security Testing
 - [x] Create role assignments for dashboards (seeded in Updater.cs)
