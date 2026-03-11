@@ -34,7 +34,7 @@ Custom SQL is enabled (`AllowExecutingCustomSql = true`). EF Core's secured Obje
 ### Prerequisites
 
 - .NET 8 SDK
-- SQL Server (LocalDB works out of the box)
+- Docker (for SQL Server container)
 - DevExpress XAF v25.2 license (packages are v25.2.3)
 
 ### Run
@@ -52,12 +52,27 @@ On first run, the database is created automatically with seed data:
 | User | *(empty)* | Default | Public Overview, User Dashboard |
 | Manager | *(empty)* | Manager | Public Overview, Manager Dashboard |
 
-### Connection String
+### Database
 
-Default in `appsettings.json` points to LocalDB:
+SQL Server runs in Docker:
+```bash
+docker run -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=YourStrongPassw0rd" -p 1433:1433 --name xafrolechooser-sqlserver -d mcr.microsoft.com/mssql/server:2022-latest
 ```
-Data Source=(localdb)\mssqllocaldb;Initial Catalog=XafSecureDash
+
+Connection string in `appsettings.json` points to `localhost,1433`.
+
+### E2E Tests
+
+29 Playwright tests (Python/pytest) validate the full security model:
+
+```bash
+cd tests
+pip install pytest playwright requests
+playwright install chromium
+python -m pytest e2e/ -v
 ```
+
+The server must be running at `https://localhost:5001` before running tests.
 
 ## Project Structure
 

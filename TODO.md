@@ -16,8 +16,8 @@
 - [x] Implement filter logic: admins see all, users see unrestricted + role-matched dashboards
 - [x] Add diagnostic logging (Serilog)
 - [x] Handle WinForms gracefully (no INonSecuredObjectSpaceFactory)
-- [ ] Test with Admin user (should see everything)
-- [ ] Test with Default-role user (should see only permitted dashboards)
+- [x] Test with Admin user (should see everything)
+- [x] Test with Default-role user (should see only permitted dashboards)
 
 ## Phase 3: Dashboard Infrastructure
 - [x] Add Serilog logging with daily rolling file sink
@@ -27,8 +27,11 @@
 - [x] Add CRM seed data (~2,734 records across 9 entities)
 - [x] Create working dashboard with Custom SQL query against CRM data
 
-## Phase 4: Security Testing (Next)
-- [ ] Create role assignments for dashboards
-- [ ] Test visibility rules with Admin, User, Manager users
-- [ ] Verify "no assignments = visible to all" behavior
-- [ ] Verify "with assignments = restricted to matching roles" behavior
+## Phase 3b: Connection String Hardening
+- [ ] Handle `ConfigureDataConnection` event to supply credentials for any connection name, so we don't need to keep adding config entries for each wizard-generated name (e.g. `localhost_Connection`)
+
+## Phase 4: Security Testing
+- [x] Create role assignments for dashboards (seeded in Updater.cs)
+- [x] Test visibility rules with Admin, User, Manager users (29/29 Playwright tests pass)
+- [x] Verify "no assignments = visible to all" behavior
+- [x] Verify "with assignments = restricted to matching roles" behavior

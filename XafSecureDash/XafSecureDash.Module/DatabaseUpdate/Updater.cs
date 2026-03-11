@@ -73,6 +73,9 @@ namespace XafSecureDash.Module.DatabaseUpdate
 
             ObjectSpace.CommitChanges();
 
+            // Seed dashboards for testing
+            SeedDashboards(defaultRole, managerRole);
+
             CrmDataSeeder.Seed(ObjectSpace);
 #endif
         }
@@ -131,6 +134,58 @@ namespace XafSecureDash.Module.DatabaseUpdate
                 managerRole.AddNavigationPermission(@"Application/NavigationItems/Items/Products", SecurityPermissionState.Allow);
             }
             return managerRole;
+        }
+
+        void SeedDashboards(PermissionPolicyRole defaultRole, PermissionPolicyRole managerRole)
+        {
+            // Create 3 test dashboards if they don't exist
+            var publicDashboard = ObjectSpace.FirstOrDefault<SecureDashboardData>(d => d.Title == "Public Overview");
+            if (publicDashboard == null)
+            {
+                publicDashboard = ObjectSpace.CreateObject<SecureDashboardData>();
+                publicDashboard.Title = "Public Overview";
+                publicDashboard.Content = @"<Dashboard CurrencyCulture=""en-US""><Title Text=""Public Overview"" /></Dashboard>";
+            }
+
+            var userDashboard = ObjectSpace.FirstOrDefault<SecureDashboardData>(d => d.Title == "User Dashboard");
+            if (userDashboard == null)
+            {
+                userDashboard = ObjectSpace.CreateObject<SecureDashboardData>();
+                userDashboard.Title = "User Dashboard";
+                userDashboard.Content = @"<Dashboard CurrencyCulture=""en-US""><Title Text=""User Dashboard"" /></Dashboard>";
+            }
+
+            var managerDashboard = ObjectSpace.FirstOrDefault<SecureDashboardData>(d => d.Title == "Manager Dashboard");
+            if (managerDashboard == null)
+            {
+                managerDashboard = ObjectSpace.CreateObject<SecureDashboardData>();
+                managerDashboard.Title = "Manager Dashboard";
+                managerDashboard.Content = @"<Dashboard CurrencyCulture=""en-US""><Title Text=""Manager Dashboard"" /></Dashboard>";
+            }
+
+            ObjectSpace.CommitChanges();
+
+            // Create role assignments: User Dashboard -> Default, Manager Dashboard -> Manager
+            // Public Overview has NO assignments (visible to all)
+            var userAssignment = ObjectSpace.FirstOrDefault<DashboardRoleAssignment>(
+                a => a.DashboardID == userDashboard.ID && a.RoleID == defaultRole.ID);
+            if (userAssignment == null)
+            {
+                userAssignment = ObjectSpace.CreateObject<DashboardRoleAssignment>();
+                userAssignment.Dashboard = ObjectSpace.GetObject(userDashboard);
+                userAssignment.Role = ObjectSpace.GetObject(defaultRole);
+            }
+
+            var managerAssignment = ObjectSpace.FirstOrDefault<DashboardRoleAssignment>(
+                a => a.DashboardID == managerDashboard.ID && a.RoleID == managerRole.ID);
+            if (managerAssignment == null)
+            {
+                managerAssignment = ObjectSpace.CreateObject<DashboardRoleAssignment>();
+                managerAssignment.Dashboard = ObjectSpace.GetObject(managerDashboard);
+                managerAssignment.Role = ObjectSpace.GetObject(managerRole);
+            }
+
+            ObjectSpace.CommitChanges();
         }
 
         PermissionPolicyRole CreateDefaultRole()

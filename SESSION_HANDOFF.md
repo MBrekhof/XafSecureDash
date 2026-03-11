@@ -1,37 +1,30 @@
 # Session Handoff
 
 ## Current State
-Dashboard infrastructure fully working on both Blazor and WinForms. Custom SQL dashboards with CRM data operational. Security filtering (DashboardSecurityController) implemented but not yet tested with non-admin users.
+POC fully validated. All 29 Playwright E2E tests pass — role-based dashboard security works correctly across all scenarios.
 
 ## What Was Done This Session
-- Added Serilog logging (bootstrap logger + file sink with daily rolling)
-- Added `DashboardConnectionStringsProvider` to Blazor Startup.cs for Custom SQL data sources
-- Created `DashboardSettingsHelper.razor` + `DashboardCustomSqlQueryController` for Custom SQL in Blazor
-- Switched from LocalDB to Docker SQL Server (`localhost,1433`, sa/YourStrongPassw0rd)
-- Removed `UseDeferredDeletion` from DbContext (was causing GCRecord filtering issues)
-- Removed seed dashboards from Updater.cs (empty dashboards caused confusion)
-- Fixed `DashboardSecurityController` to handle missing `INonSecuredObjectSpaceFactory` on WinForms (GetService instead of GetRequiredService)
-- Added diagnostic logging to `DashboardSecurityController`
-- Updated WinForms `DashboardDataType` to use `SecureDashboardData`
-- Updated WinForms `App.config` to use Docker SQL Server with dashboard connection strings
-- Changed sa password to `YourStrongPassw0rd` (removed `!` which caused XPO parsing issues)
+- Added seed dashboards to `Updater.cs`: "Public Overview" (no assignments, visible to all), "User Dashboard" (→ Default role), "Manager Dashboard" (→ Manager role)
+- Added seed `DashboardRoleAssignment` records linking dashboards to roles
+- Dropped and recreated DB to pick up seed data
+- Ran full Playwright E2E suite: **29/29 pass** in ~7 minutes
+  - test_01: Authentication (5/5) — login/logout for Admin, User, Manager
+  - test_02: Dashboard visibility (7/7) — core POC validation
+  - test_03: Role assignment management (5/5) — admin CRUD, non-admin blocked
+  - test_04: Dynamic access changes (3/3) — grant/revoke/remove-all
+  - test_05: Dashboard creation (4/4) — admin creates, user cannot
+  - test_06: Edge cases (5/5) — unauth redirect, public visibility, multi-login isolation
 
 ## Key Technical Details
-- **Dashboard Custom SQL**: Requires `XpoProvider=MSSqlServer` prefix in connection string. Standard ADO.NET strings won't work.
-- **Connection name resolution**: Dashboard XML stores connection names (e.g. `localhost_Connection`). Both `App.config` and `appsettings.json` must have matching entries.
-- **GCRecord**: With `UseDeferredDeletion` removed, GCRecord column in existing tables is harmless but not used.
-- **WinForms + INonSecuredObjectSpaceFactory**: Not registered in WinForms DI. Controller gracefully skips security filtering when unavailable.
-- **Dashboard SQL query for CRM data** (no GCRecord filter needed):
-  ```sql
-  SELECT c.Name AS CompanyName, c.City, c.Country, i.InvoiceNumber, i.InvoiceDate, i.DueDate, i.Status, i.TotalAmount, i.TaxAmount
-  FROM Companies c LEFT JOIN Invoices i ON i.CompanyID = c.ID
-  ORDER BY c.Name, i.InvoiceDate
-  ```
+- Seed dashboards use minimal XML content (`<Dashboard CurrencyCulture="en-US"><Title Text="..." /></Dashboard>`)
+- `SeedDashboards()` is idempotent — checks for existing records before creating
+- Role assignments use `ObjectSpace.GetObject()` to re-resolve entities in correct ObjectSpace
+- XAF creates the database on first login, not on server startup
 
 ## What's Next
-- Test dashboard security filtering with non-admin users (Admin, User, Manager)
-- Create role assignments and verify visibility rules
-- This is the core purpose of the POC — everything else was infrastructure
+- Phase 3b: Connection string hardening (`ConfigureDataConnection` event)
+- POC is complete — consider writing up findings or demoing
+- Optional: add more dashboards with real Custom SQL queries for demo purposes
 
 ## Blockers
 None.
