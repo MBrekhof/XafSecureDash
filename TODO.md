@@ -9,23 +9,26 @@
 - [x] Create `SecureDashboardData` entity (extends `DashboardData`, maps to `DashboardData` table)
 - [x] Create `DashboardRoleAssignment` entity (links dashboards to roles via FK)
 - [x] Register both entities in `XafSecureDashEFCoreDbContext`
-- [x] Register `SecureDashboardData` as `DashboardDataType` in Blazor `Startup.cs`
-- [x] Enable `AllowExecutingCustomSql` on dashboard configurator in Blazor `Startup.cs`
+- [x] Register `SecureDashboardData` as `DashboardDataType` in Blazor and WinForms
 
 ## Phase 2: Security Controller
 - [x] Create `DashboardSecurityController` (ObjectViewController on ListView of SecureDashboardData)
 - [x] Implement filter logic: admins see all, users see unrestricted + role-matched dashboards
+- [x] Add diagnostic logging (Serilog)
+- [x] Handle WinForms gracefully (no INonSecuredObjectSpaceFactory)
 - [ ] Test with Admin user (should see everything)
 - [ ] Test with Default-role user (should see only permitted dashboards)
 
-## Phase 3: Seed Data
-- [x] Add sample dashboards in `Updater.cs` (Public Overview, User Dashboard, Manager Dashboard)
-- [x] Add sample role assignments in `Updater.cs`
-- [x] Create a second non-admin role ("Manager") to demonstrate differential access
-- [x] Add dashboard read permissions to Default and Manager roles
+## Phase 3: Dashboard Infrastructure
+- [x] Add Serilog logging with daily rolling file sink
+- [x] Enable Custom SQL data sources (DashboardSettingsHelper + DashboardCustomSqlQueryController)
+- [x] Configure DashboardConnectionStringsProvider for Blazor
+- [x] Switch to Docker SQL Server (localhost,1433)
+- [x] Add CRM seed data (~2,734 records across 9 entities)
+- [x] Create working dashboard with Custom SQL query against CRM data
 
-## Phase 4: Polish
-- [x] Verify navigation item placement (Reports group)
-- [x] DashboardRoleAssignment in Administration nav group (admin manages)
-- [x] Add role permissions for SecureDashboardData and DashboardRoleAssignment (read for Default/Manager)
-- [ ] Manual testing with all 3 users (Admin, User, Manager)
+## Phase 4: Security Testing (Next)
+- [ ] Create role assignments for dashboards
+- [ ] Test visibility rules with Admin, User, Manager users
+- [ ] Verify "no assignments = visible to all" behavior
+- [ ] Verify "with assignments = restricted to matching roles" behavior

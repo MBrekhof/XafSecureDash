@@ -58,8 +58,9 @@ This is a DevExpress XAF (eXpressApp Framework) v25.2 application using EF Core 
 ### Key Patterns
 
 - **Security**: XAF Integrated Security with `PermissionPolicyRole` and custom `ApplicationUser` (extends `PermissionPolicyUser` with OAuth/lockout support). Blazor uses cookie auth; WebApi uses JWT.
-- **DbContext**: `XafSecureDashEFCoreDbContext` uses deferred deletion (`UseDeferredDeletion`), optimistic locking (`UseOptimisticLock`), and change tracking with `ChangingAndChangedNotificationsWithOriginalValues`.
-- **Database**: SQL Server (LocalDB by default). Connection string key: `ConnectionString` in appsettings.json.
+- **DbContext**: `XafSecureDashEFCoreDbContext` uses optimistic locking (`UseOptimisticLock`) and change tracking with `ChangingAndChangedNotificationsWithOriginalValues`. No deferred deletion.
+- **Database**: SQL Server in Docker (`localhost,1433`, sa/YourStrongPassw0rd). Connection string key: `ConnectionString` in appsettings.json. Dashboard Custom SQL uses `DashboardSqlConnection` (requires `XpoProvider=MSSqlServer` prefix).
+- **Logging**: Serilog with daily rolling file sink in `logs/` directory.
 - **Seed data**: Debug/EasyTest builds create "Admin" (Administrators role) and "User" (Default role) accounts with empty passwords. Controlled by `#if !RELEASE` in `Updater.cs`.
 - **XAF Modules enabled**: ConditionalAppearance, Dashboards, FileAttachments, Notifications, Office, PivotGrid, Charts, Reports, TreeListEditors, Validation, ViewVariants.
 

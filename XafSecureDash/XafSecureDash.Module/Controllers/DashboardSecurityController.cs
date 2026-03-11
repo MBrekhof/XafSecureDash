@@ -6,6 +6,7 @@ using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Security;
 using DevExpress.Persistent.BaseImpl.EF.PermissionPolicy;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using XafSecureDash.Module.BusinessObjects;
 using XafSecureDash.Module.BusinessObjects.Dashboard;
 
@@ -13,9 +14,13 @@ namespace XafSecureDash.Module.Controllers
 {
     public class DashboardSecurityController : ObjectViewController<ListView, SecureDashboardData>
     {
+        private ILogger _logger;
+
         protected override void OnActivated()
         {
             base.OnActivated();
+            _logger = Application.ServiceProvider.GetService<ILoggerFactory>()
+                ?.CreateLogger<DashboardSecurityController>();
             ApplyDashboardSecurityFilter();
         }
 
@@ -24,13 +29,18 @@ namespace XafSecureDash.Module.Controllers
             var currentUser = SecuritySystem.CurrentUser as ApplicationUser;
             if (currentUser == null)
             {
+                _logger?.LogWarning("DashboardSecurity: CurrentUser is null, hiding all dashboards");
                 View.CollectionSource.Criteria["DashboardSecurity"] = CriteriaOperator.Parse("1=0");
                 return;
             }
 
+            _logger?.LogInformation("DashboardSecurity: User={User}, RoleCount={RoleCount}",
+                currentUser.UserName, currentUser.Roles.Count);
+
             var isAdmin = currentUser.Roles.OfType<PermissionPolicyRole>().Any(r => r.IsAdministrative);
             if (isAdmin)
             {
+                _logger?.LogInformation("DashboardSecurity: Admin user, removing filter");
                 View.CollectionSource.Criteria.Remove("DashboardSecurity");
                 return;
             }
@@ -67,12 +77,18 @@ namespace XafSecureDash.Module.Controllers
 
         private INonSecuredObjectSpaceFactory GetNonSecuredFactory()
         {
-            return Application.ServiceProvider.GetRequiredService<INonSecuredObjectSpaceFactory>();
+            var factory = Application.ServiceProvider.GetService<INonSecuredObjectSpaceFactory>();
+            if (factory == null)
+            {
+                _logger?.LogWarning("DashboardSecurity: INonSecuredObjectSpaceFactory not available (WinForms?), skipping security filter");
+            }
+            return factory;
         }
 
         private List<Guid> GetDashboardIdsWithAssignments()
         {
             var factory = GetNonSecuredFactory();
+            if (factory == null) return new List<Guid>();
             using var os = factory.CreateNonSecuredObjectSpace<DashboardRoleAssignment>();
             var assignments = os.GetObjects<DashboardRoleAssignment>();
             return assignments
@@ -85,6 +101,7 @@ namespace XafSecureDash.Module.Controllers
         private List<Guid> GetAccessibleDashboardIds(List<Guid> userRoleIds)
         {
             var factory = GetNonSecuredFactory();
+            if (factory == null) return new List<Guid>();
             using var os = factory.CreateNonSecuredObjectSpace<DashboardRoleAssignment>();
             var assignments = os.GetObjects<DashboardRoleAssignment>();
             return assignments

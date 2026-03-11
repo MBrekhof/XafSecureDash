@@ -73,7 +73,6 @@ namespace XafSecureDash.Module.DatabaseUpdate
 
             ObjectSpace.CommitChanges();
 
-            SeedDashboards(defaultRole, managerRole);
             CrmDataSeeder.Seed(ObjectSpace);
 #endif
         }
@@ -132,51 +131,6 @@ namespace XafSecureDash.Module.DatabaseUpdate
                 managerRole.AddNavigationPermission(@"Application/NavigationItems/Items/Products", SecurityPermissionState.Allow);
             }
             return managerRole;
-        }
-
-        void SeedDashboards(PermissionPolicyRole defaultRole, PermissionPolicyRole managerRole)
-        {
-            // Dashboard 1: visible to everyone (no role assignments)
-            var publicDash = ObjectSpace.FirstOrDefault<SecureDashboardData>(d => d.Title == "Public Overview");
-            if (publicDash == null)
-            {
-                publicDash = ObjectSpace.CreateObject<SecureDashboardData>();
-                publicDash.Title = "Public Overview";
-            }
-
-            // Dashboard 2: restricted to Default role only
-            var userDash = ObjectSpace.FirstOrDefault<SecureDashboardData>(d => d.Title == "User Dashboard");
-            if (userDash == null)
-            {
-                userDash = ObjectSpace.CreateObject<SecureDashboardData>();
-                userDash.Title = "User Dashboard";
-            }
-
-            // Dashboard 3: restricted to Manager role only
-            var managerDash = ObjectSpace.FirstOrDefault<SecureDashboardData>(d => d.Title == "Manager Dashboard");
-            if (managerDash == null)
-            {
-                managerDash = ObjectSpace.CreateObject<SecureDashboardData>();
-                managerDash.Title = "Manager Dashboard";
-            }
-
-            ObjectSpace.CommitChanges();
-
-            // Role assignments (only for restricted dashboards)
-            if (!ObjectSpace.GetObjects<DashboardRoleAssignment>().Any())
-            {
-                var assignment1 = ObjectSpace.CreateObject<DashboardRoleAssignment>();
-                assignment1.Dashboard = userDash;
-                assignment1.Role = defaultRole;
-                assignment1.Notes = "Seed: User Dashboard visible to Default role";
-
-                var assignment2 = ObjectSpace.CreateObject<DashboardRoleAssignment>();
-                assignment2.Dashboard = managerDash;
-                assignment2.Role = managerRole;
-                assignment2.Notes = "Seed: Manager Dashboard visible to Manager role";
-
-                ObjectSpace.CommitChanges();
-            }
         }
 
         PermissionPolicyRole CreateDefaultRole()

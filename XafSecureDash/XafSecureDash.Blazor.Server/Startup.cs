@@ -7,6 +7,7 @@ using DevExpress.Persistent.BaseImpl.EF.PermissionPolicy;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components.Server.Circuits;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 using XafSecureDash.Blazor.Server.Services;
 
 namespace XafSecureDash.Blazor.Server
@@ -40,6 +41,8 @@ namespace XafSecureDash.Blazor.Server
                         options.DashboardDataType = typeof(XafSecureDash.Module.BusinessObjects.Dashboard.SecureDashboardData);
                         options.SetupDashboardConfigurator = (configurator, serviceProvider) =>
                         {
+                            configurator.SetConnectionStringsProvider(
+                                new DevExpress.DashboardAspNetCore.DashboardConnectionStringsProvider(Configuration));
                             configurator.AllowExecutingCustomSql = true;
                         };
                     })
@@ -125,6 +128,7 @@ namespace XafSecureDash.Blazor.Server
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            app.UseSerilogRequestLogging();
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();

@@ -1,0 +1,12 @@
+@using DevExpress.DashboardBlazor
+
+@ChildContent
+<DxExtensions>
+    <DxDataSourceWizard EnableCustomSql="true" />
+</DxExtensions>
+
+@code {
+    [Parameter] public RenderFragment ChildContent { get; set; }
+    public static RenderFragment Create(RenderFragment childContent) =>
+        @<DashboardSettingsHelper ChildContent=childContent />;
+}

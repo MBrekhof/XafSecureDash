@@ -1,30 +1,37 @@
 # Session Handoff
 
 ## Current State
-All phases complete. 29/29 Playwright E2E tests passing. CRM data seeded.
+Dashboard infrastructure fully working on both Blazor and WinForms. Custom SQL dashboards with CRM data operational. Security filtering (DashboardSecurityController) implemented but not yet tested with non-admin users.
 
-## What Was Done
-- Created `SecureDashboardData` entity in `Module/BusinessObjects/Dashboard/`
-- Created `DashboardRoleAssignment` entity in `Module/BusinessObjects/Dashboard/`
-- Created `DashboardSecurityController` in `Module/Controllers/` (uses `INonSecuredObjectSpaceFactory`)
-- Registered entities in DbContext and Module.cs
-- Updated Blazor Startup.cs: `DashboardDataType = SecureDashboardData`, `AllowExecutingCustomSql = true`
-- Fixed `BlazorApplication.cs` to auto-create DB without debugger attached
-- Created 9 CRM entities (Company, Contact, Product, Order, OrderLine, Invoice, InvoiceLine, ConsultancyProject, TimeEntry) with ~2,734 seeded records
-- Created 29 Playwright E2E tests covering auth, visibility, CRUD, dynamic access, edge cases
-- Created `devexpress-xaf-playwright` skill with XAF Blazor DOM selector patterns
+## What Was Done This Session
+- Added Serilog logging (bootstrap logger + file sink with daily rolling)
+- Added `DashboardConnectionStringsProvider` to Blazor Startup.cs for Custom SQL data sources
+- Created `DashboardSettingsHelper.razor` + `DashboardCustomSqlQueryController` for Custom SQL in Blazor
+- Switched from LocalDB to Docker SQL Server (`localhost,1433`, sa/YourStrongPassw0rd)
+- Removed `UseDeferredDeletion` from DbContext (was causing GCRecord filtering issues)
+- Removed seed dashboards from Updater.cs (empty dashboards caused confusion)
+- Fixed `DashboardSecurityController` to handle missing `INonSecuredObjectSpaceFactory` on WinForms (GetService instead of GetRequiredService)
+- Added diagnostic logging to `DashboardSecurityController`
+- Updated WinForms `DashboardDataType` to use `SecureDashboardData`
+- Updated WinForms `App.config` to use Docker SQL Server with dashboard connection strings
+- Changed sa password to `YourStrongPassw0rd` (removed `!` which caused XPO parsing issues)
 
 ## Key Technical Details
-- **Lookup fill pattern**: Use `press_sequentially()` on `input[role='combobox']` to trigger autocomplete, then click `li[role='option']`
-- **Delete confirmation**: XAF uses `button[data-action-name="Yes"]` not `button:has-text("Yes")`
-- **Session isolation**: Clear cookies with `page.context.clear_cookies()` between user switches to avoid Blazor SignalR circuit caching
-- **Collections**: XAF EF Core requires `ObservableCollection<T>` not `List<T>` for navigation properties
-- **Dashboard security model**: No assignments = visible to all. Having assignments = restricted to matching roles.
+- **Dashboard Custom SQL**: Requires `XpoProvider=MSSqlServer` prefix in connection string. Standard ADO.NET strings won't work.
+- **Connection name resolution**: Dashboard XML stores connection names (e.g. `localhost_Connection`). Both `App.config` and `appsettings.json` must have matching entries.
+- **GCRecord**: With `UseDeferredDeletion` removed, GCRecord column in existing tables is harmless but not used.
+- **WinForms + INonSecuredObjectSpaceFactory**: Not registered in WinForms DI. Controller gracefully skips security filtering when unavailable.
+- **Dashboard SQL query for CRM data** (no GCRecord filter needed):
+  ```sql
+  SELECT c.Name AS CompanyName, c.City, c.Country, i.InvoiceNumber, i.InvoiceDate, i.DueDate, i.Status, i.TotalAmount, i.TaxAmount
+  FROM Companies c LEFT JOIN Invoices i ON i.CompanyID = c.ID
+  ORDER BY c.Name, i.InvoiceDate
+  ```
 
 ## What's Next
-- Commit all changes and push
-- Create SQL dashboards using the Custom SQL data sources against CRM data
-- Further testing/refinement as needed
+- Test dashboard security filtering with non-admin users (Admin, User, Manager)
+- Create role assignments and verify visibility rules
+- This is the core purpose of the POC — everything else was infrastructure
 
 ## Blockers
 None.

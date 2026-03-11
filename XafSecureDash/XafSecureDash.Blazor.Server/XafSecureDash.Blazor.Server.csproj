@@ -26,7 +26,10 @@
     <PackageReference Include="DevExpress.ExpressApp.Office.Blazor" Version="25.2.3" />
     <PackageReference Include="DevExpress.ExpressApp.ReportsV2.Blazor" Version="25.2.3" />
     <PackageReference Include="DevExpress.ExpressApp.Validation.Blazor" Version="25.2.3" />
-    
+    <PackageReference Include="Serilog" Version="4.3.0" />
+    <PackageReference Include="Serilog.AspNetCore" Version="8.0.3" />
+    <PackageReference Include="Serilog.Settings.Configuration" Version="9.0.0" />
+    <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\XafSecureDash.Module\XafSecureDash.Module.csproj" />
