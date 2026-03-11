@@ -1,5 +1,7 @@
 # XafSecureDash
 
+![Architecture](docs/architecture.png)
+
 Proof-of-concept for **role-based dashboard security** in DevExpress XAF (EF Core, Blazor Server).
 
 Out of the box, XAF dashboards are visible to anyone with read permission on `DashboardData`. This project adds per-dashboard role filtering: admins assign roles to dashboards, and users only see what their roles entitle them to.
