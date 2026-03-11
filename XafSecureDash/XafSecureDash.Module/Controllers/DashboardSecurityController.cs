@@ -5,6 +5,7 @@ using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Security;
 using DevExpress.Persistent.BaseImpl.EF.PermissionPolicy;
+using Microsoft.Extensions.DependencyInjection;
 using XafSecureDash.Module.BusinessObjects;
 using XafSecureDash.Module.BusinessObjects.Dashboard;
 
@@ -64,9 +65,15 @@ namespace XafSecureDash.Module.Controllers
             }
         }
 
+        private INonSecuredObjectSpaceFactory GetNonSecuredFactory()
+        {
+            return Application.ServiceProvider.GetRequiredService<INonSecuredObjectSpaceFactory>();
+        }
+
         private List<Guid> GetDashboardIdsWithAssignments()
         {
-            using var os = Application.CreateObjectSpace(typeof(DashboardRoleAssignment));
+            var factory = GetNonSecuredFactory();
+            using var os = factory.CreateNonSecuredObjectSpace<DashboardRoleAssignment>();
             var assignments = os.GetObjects<DashboardRoleAssignment>();
             return assignments
                 .Where(a => a.Dashboard != null)
@@ -77,7 +84,8 @@ namespace XafSecureDash.Module.Controllers
 
         private List<Guid> GetAccessibleDashboardIds(List<Guid> userRoleIds)
         {
-            using var os = Application.CreateObjectSpace(typeof(DashboardRoleAssignment));
+            var factory = GetNonSecuredFactory();
+            using var os = factory.CreateNonSecuredObjectSpace<DashboardRoleAssignment>();
             var assignments = os.GetObjects<DashboardRoleAssignment>();
             return assignments
                 .Where(a => a.Dashboard != null && a.Role != null && userRoleIds.Contains(a.Role.ID))

@@ -5,6 +5,7 @@ using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.BaseImpl.EF.PermissionPolicy;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
+using XafSecureDash.Module.BusinessObjects.Crm;
 using XafSecureDash.Module.BusinessObjects.Dashboard;
 
 namespace XafSecureDash.Module.BusinessObjects
@@ -26,6 +27,17 @@ namespace XafSecureDash.Module.BusinessObjects
         public DbSet<SecureDashboardData> DashboardData { get; set; }
         public DbSet<DashboardRoleAssignment> DashboardRoleAssignments { get; set; }
         public DbSet<HCategory> HCategories { get; set; }
+
+        // CRM entities
+        public DbSet<Company> Companies { get; set; }
+        public DbSet<Contact> Contacts { get; set; }
+        public DbSet<Product> Products { get; set; }
+        public DbSet<Order> Orders { get; set; }
+        public DbSet<OrderLine> OrderLines { get; set; }
+        public DbSet<Invoice> Invoices { get; set; }
+        public DbSet<InvoiceLine> InvoiceLines { get; set; }
+        public DbSet<ConsultancyProject> ConsultancyProjects { get; set; }
+        public DbSet<TimeEntry> TimeEntries { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

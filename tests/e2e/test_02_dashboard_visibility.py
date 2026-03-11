@@ -1,9 +1,9 @@
 """Dashboard visibility tests — core POC validation."""
 import pytest
-from playwright.sync_api import Page, expect
+from playwright.sync_api import Page
 import sys
 sys.path.insert(0, "..")
-from conftest import xaf_login, get_dashboard_titles, BASE_URL
+from conftest import xaf_login, get_dashboard_titles
 
 
 @pytest.mark.visibility
@@ -47,10 +47,10 @@ class TestDashboardVisibility:
         """User should see exactly 2 dashboards."""
         xaf_login(page, "User")
         titles = get_dashboard_titles(page)
-        assert len(titles) == 2, f"Expected 2 dashboards, got {len(titles)}: {titles}"
+        assert len(titles) == 2, f"Expected 2, got {len(titles)}: {titles}"
 
     def test_manager_exact_dashboard_count(self, page: Page):
         """Manager should see exactly 2 dashboards."""
         xaf_login(page, "Manager")
         titles = get_dashboard_titles(page)
-        assert len(titles) == 2, f"Expected 2 dashboards, got {len(titles)}: {titles}"
+        assert len(titles) == 2, f"Expected 2, got {len(titles)}: {titles}"

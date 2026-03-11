@@ -43,6 +43,16 @@ namespace XafSecureDash.Module
             AdditionalExportedTypes.Add(typeof(DevExpress.Persistent.BaseImpl.EF.HCategory));
             AdditionalExportedTypes.Add(typeof(XafSecureDash.Module.BusinessObjects.Dashboard.SecureDashboardData));
             AdditionalExportedTypes.Add(typeof(XafSecureDash.Module.BusinessObjects.Dashboard.DashboardRoleAssignment));
+            // CRM entities
+            AdditionalExportedTypes.Add(typeof(XafSecureDash.Module.BusinessObjects.Crm.Company));
+            AdditionalExportedTypes.Add(typeof(XafSecureDash.Module.BusinessObjects.Crm.Contact));
+            AdditionalExportedTypes.Add(typeof(XafSecureDash.Module.BusinessObjects.Crm.Product));
+            AdditionalExportedTypes.Add(typeof(XafSecureDash.Module.BusinessObjects.Crm.Order));
+            AdditionalExportedTypes.Add(typeof(XafSecureDash.Module.BusinessObjects.Crm.OrderLine));
+            AdditionalExportedTypes.Add(typeof(XafSecureDash.Module.BusinessObjects.Crm.Invoice));
+            AdditionalExportedTypes.Add(typeof(XafSecureDash.Module.BusinessObjects.Crm.InvoiceLine));
+            AdditionalExportedTypes.Add(typeof(XafSecureDash.Module.BusinessObjects.Crm.ConsultancyProject));
+            AdditionalExportedTypes.Add(typeof(XafSecureDash.Module.BusinessObjects.Crm.TimeEntry));
         }
         public override IEnumerable<ModuleUpdater> GetModuleUpdaters(IObjectSpace objectSpace, Version versionFromDB)
         {

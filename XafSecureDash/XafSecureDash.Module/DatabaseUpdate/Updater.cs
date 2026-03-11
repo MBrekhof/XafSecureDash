@@ -9,6 +9,7 @@ using DevExpress.Persistent.BaseImpl.EF;
 using DevExpress.Persistent.BaseImpl.EF.PermissionPolicy;
 using Microsoft.Extensions.DependencyInjection;
 using XafSecureDash.Module.BusinessObjects;
+using XafSecureDash.Module.BusinessObjects.Crm;
 using XafSecureDash.Module.BusinessObjects.Dashboard;
 
 namespace XafSecureDash.Module.DatabaseUpdate
@@ -73,6 +74,7 @@ namespace XafSecureDash.Module.DatabaseUpdate
             ObjectSpace.CommitChanges();
 
             SeedDashboards(defaultRole, managerRole);
+            CrmDataSeeder.Seed(ObjectSpace);
 #endif
         }
         public override void UpdateDatabaseBeforeUpdateSchema()
@@ -113,6 +115,21 @@ namespace XafSecureDash.Module.DatabaseUpdate
                 managerRole.AddTypePermissionsRecursively<SecureDashboardData>(SecurityOperations.Read, SecurityPermissionState.Allow);
                 managerRole.AddNavigationPermission(@"Application/NavigationItems/Items/Reports/Items/SecureDashboardData_ListView", SecurityPermissionState.Allow);
                 managerRole.AddTypePermissionsRecursively<DashboardRoleAssignment>(SecurityOperations.Read, SecurityPermissionState.Allow);
+
+                // CRM read access
+                managerRole.AddTypePermissionsRecursively<Company>(SecurityOperations.ReadWriteAccess, SecurityPermissionState.Allow);
+                managerRole.AddTypePermissionsRecursively<Contact>(SecurityOperations.ReadWriteAccess, SecurityPermissionState.Allow);
+                managerRole.AddTypePermissionsRecursively<Product>(SecurityOperations.Read, SecurityPermissionState.Allow);
+                managerRole.AddTypePermissionsRecursively<Order>(SecurityOperations.ReadWriteAccess, SecurityPermissionState.Allow);
+                managerRole.AddTypePermissionsRecursively<OrderLine>(SecurityOperations.ReadWriteAccess, SecurityPermissionState.Allow);
+                managerRole.AddTypePermissionsRecursively<Invoice>(SecurityOperations.ReadWriteAccess, SecurityPermissionState.Allow);
+                managerRole.AddTypePermissionsRecursively<InvoiceLine>(SecurityOperations.ReadWriteAccess, SecurityPermissionState.Allow);
+                managerRole.AddTypePermissionsRecursively<ConsultancyProject>(SecurityOperations.ReadWriteAccess, SecurityPermissionState.Allow);
+                managerRole.AddTypePermissionsRecursively<TimeEntry>(SecurityOperations.ReadWriteAccess, SecurityPermissionState.Allow);
+                managerRole.AddNavigationPermission(@"Application/NavigationItems/Items/CRM", SecurityPermissionState.Allow);
+                managerRole.AddNavigationPermission(@"Application/NavigationItems/Items/Sales", SecurityPermissionState.Allow);
+                managerRole.AddNavigationPermission(@"Application/NavigationItems/Items/Consultancy", SecurityPermissionState.Allow);
+                managerRole.AddNavigationPermission(@"Application/NavigationItems/Items/Products", SecurityPermissionState.Allow);
             }
             return managerRole;
         }
@@ -184,6 +201,21 @@ namespace XafSecureDash.Module.DatabaseUpdate
                 defaultRole.AddTypePermissionsRecursively<SecureDashboardData>(SecurityOperations.Read, SecurityPermissionState.Allow);
                 defaultRole.AddNavigationPermission(@"Application/NavigationItems/Items/Reports/Items/SecureDashboardData_ListView", SecurityPermissionState.Allow);
                 defaultRole.AddTypePermissionsRecursively<DashboardRoleAssignment>(SecurityOperations.Read, SecurityPermissionState.Allow);
+
+                // CRM read access
+                defaultRole.AddTypePermissionsRecursively<Company>(SecurityOperations.Read, SecurityPermissionState.Allow);
+                defaultRole.AddTypePermissionsRecursively<Contact>(SecurityOperations.Read, SecurityPermissionState.Allow);
+                defaultRole.AddTypePermissionsRecursively<Product>(SecurityOperations.Read, SecurityPermissionState.Allow);
+                defaultRole.AddTypePermissionsRecursively<Order>(SecurityOperations.Read, SecurityPermissionState.Allow);
+                defaultRole.AddTypePermissionsRecursively<OrderLine>(SecurityOperations.Read, SecurityPermissionState.Allow);
+                defaultRole.AddTypePermissionsRecursively<Invoice>(SecurityOperations.Read, SecurityPermissionState.Allow);
+                defaultRole.AddTypePermissionsRecursively<InvoiceLine>(SecurityOperations.Read, SecurityPermissionState.Allow);
+                defaultRole.AddTypePermissionsRecursively<ConsultancyProject>(SecurityOperations.Read, SecurityPermissionState.Allow);
+                defaultRole.AddTypePermissionsRecursively<TimeEntry>(SecurityOperations.Read, SecurityPermissionState.Allow);
+                defaultRole.AddNavigationPermission(@"Application/NavigationItems/Items/CRM", SecurityPermissionState.Allow);
+                defaultRole.AddNavigationPermission(@"Application/NavigationItems/Items/Sales", SecurityPermissionState.Allow);
+                defaultRole.AddNavigationPermission(@"Application/NavigationItems/Items/Consultancy", SecurityPermissionState.Allow);
+                defaultRole.AddNavigationPermission(@"Application/NavigationItems/Items/Products", SecurityPermissionState.Allow);
             }
             return defaultRole;
         }

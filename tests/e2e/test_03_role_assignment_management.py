@@ -3,7 +3,7 @@ import pytest
 from playwright.sync_api import Page, expect
 import sys
 sys.path.insert(0, "..")
-from conftest import xaf_login, navigate_to, BASE_URL
+from conftest import xaf_login, navigate_to_role_assignments, get_sidebar_groups, log
 
 
 @pytest.mark.management
@@ -11,65 +11,44 @@ class TestRoleAssignmentManagement:
     def test_admin_can_see_role_assignments(self, page: Page):
         """Admin can navigate to DashboardRoleAssignment list."""
         xaf_login(page, "Admin")
-        navigate_to(page, "Administration")
-        page.click('.xaf-navigation >> text="Dashboard Role Assignment"')
-        page.wait_for_selector(".xaf-listview", timeout=15_000)
-        expect(page.locator(".xaf-listview")).to_be_visible()
+        navigate_to_role_assignments(page)
+        expect(page.locator(".dxbl-grid")).to_be_visible()
 
-    def test_admin_can_create_role_assignment(self, page: Page):
-        """Admin can create a new DashboardRoleAssignment."""
+    def test_admin_can_open_new_form(self, page: Page):
+        """Admin can open the New DashboardRoleAssignment form."""
         xaf_login(page, "Admin")
-        navigate_to(page, "Administration")
-        page.click('.xaf-navigation >> text="Dashboard Role Assignment"')
-        page.wait_for_selector(".xaf-listview", timeout=15_000)
-
-        # Click New button
-        page.click('[data-action-id="New"]')
-        page.wait_for_selector(".xaf-detailview", timeout=15_000)
-
-        # DetailView should be visible with Dashboard and Role lookups
-        expect(page.locator(".xaf-detailview")).to_be_visible()
-
-        # Cancel without saving (we don't want to mess up seed data for other tests)
-        page.click('[data-action-id="Cancel"]')
+        navigate_to_role_assignments(page)
+        # XAF toolbar: look for New button by text content
+        new_btn = page.locator('button:has-text("New")').first
+        new_btn.click()
+        page.wait_for_timeout(3000)
+        # The detail view should show form layout fields
+        log.info("URL after New: %s", page.url)
+        # Verify we're on a form (form layout present)
+        expect(page.locator(".dxbl-fl, .dxbl-form-layout, dxbl-form-layout")).to_be_visible()
 
     def test_admin_can_view_existing_assignment(self, page: Page):
-        """Admin can click into an existing role assignment detail."""
+        """Admin can click into an existing role assignment."""
         xaf_login(page, "Admin")
-        navigate_to(page, "Administration")
-        page.click('.xaf-navigation >> text="Dashboard Role Assignment"')
-        page.wait_for_selector(".xaf-listview", timeout=15_000)
+        navigate_to_role_assignments(page)
+        first_row = page.locator(".dxbl-grid tr.cursor-pointer").first
+        expect(first_row).to_be_visible()
+        first_row.click()
+        page.wait_for_timeout(3000)
+        # Should show a detail/form view
+        expect(page.locator(".dxbl-fl, .dxbl-form-layout, dxbl-form-layout")).to_be_visible()
+        log.info("Detail view URL: %s", page.url)
 
-        # Click first row to open detail view
-        first_row = page.locator('.xaf-listview [class*="GridRow"]').first
-        if first_row.is_visible():
-            first_row.click()
-            page.wait_for_selector(".xaf-detailview", timeout=15_000)
-            expect(page.locator(".xaf-detailview")).to_be_visible()
-
-    def test_user_cannot_access_role_assignments_nav(self, page: Page):
-        """Non-admin User should not see Administration nav or DashboardRoleAssignment."""
+    def test_user_cannot_see_role_assignment_nav(self, page: Page):
+        """Non-admin User should not see Dashboard Role Assignment in sidebar."""
         xaf_login(page, "User")
-        # Administration group should not be in navigation, or DashboardRoleAssignment not listed
-        admin_nav = page.locator('.xaf-navigation >> text="Administration"')
-        # It might not exist at all, or if it does, DashboardRoleAssignment shouldn't be there
-        if admin_nav.is_visible():
-            admin_nav.click()
-            page.wait_for_timeout(500)
-            assignment_nav = page.locator(
-                '.xaf-navigation >> text="Dashboard Role Assignment"'
-            )
-            expect(assignment_nav).not_to_be_visible()
-        # If Administration nav doesn't exist, that's also a pass
+        groups = get_sidebar_groups(page)
+        log.info("User sidebar: %s", groups)
+        assert "Dashboard Role Assignment" not in groups
 
-    def test_manager_cannot_access_role_assignments_nav(self, page: Page):
-        """Manager should not see DashboardRoleAssignment in navigation."""
+    def test_manager_cannot_see_role_assignment_nav(self, page: Page):
+        """Manager should not see Dashboard Role Assignment in sidebar."""
         xaf_login(page, "Manager")
-        admin_nav = page.locator('.xaf-navigation >> text="Administration"')
-        if admin_nav.is_visible():
-            admin_nav.click()
-            page.wait_for_timeout(500)
-            assignment_nav = page.locator(
-                '.xaf-navigation >> text="Dashboard Role Assignment"'
-            )
-            expect(assignment_nav).not_to_be_visible()
+        groups = get_sidebar_groups(page)
+        log.info("Manager sidebar: %s", groups)
+        assert "Dashboard Role Assignment" not in groups
